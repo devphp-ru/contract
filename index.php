@@ -1,11 +1,48 @@
 <?php
 declare(strict_types=1);
+session_start();
+
+use App\Core\Validator;
+use App\Models\Contract;
+
 error_reporting(-1);
 
 require __DIR__ . '/vendor/autoload.php';
 
 if (!empty($_POST)) {
-    print_r($_POST);
+    $validator = new Validator();
+    $data = $validator->load($_POST)
+        ->clear()
+        ->checkEmpty()
+        ->getArray();
+
+    if ($errors = $validator->getErrors()) {
+        $_SESSION['errors'] = $errors;
+    } else {
+        try {
+            $contract = new Contract(
+                $data['number_contract'],
+                (int)$data['product_id'],
+                $data['delivery_time'],
+                $data['comment'],
+                (int)$data['price_contract'],
+                $data['client_surname'],
+                $data['client_name'],
+                $data['client_patronymic'],
+                $data['employee_surname'],
+                $data['employee_name'],
+                $data['employee_patronymic']
+            );
+
+            $_SESSION['success'] = 'Контракт создан';
+        } catch (\Exception $e) {
+            $_SESSION['errors'][] = $e->getMessage();
+        }
+
+    }
+
+    header("Location: /");
+    die;
 }
 ?>
 <!doctype html>
@@ -22,6 +59,20 @@ if (!empty($_POST)) {
 <div class="container">
 
     <?php require __DIR__ . '/view/blocks/navbar/_navbar-top.php'; ?>
+
+    <?php if (!empty($_SESSION['errors'])): ?>
+        <div class="alert alert-danger mt-2 mb-2" role="alert">
+            <?php echo implode(' ', $_SESSION['errors']); ?>
+        </div>
+        <?php unset($_SESSION['errors']); ?>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['success'])): ?>
+        <div class="alert alert-success" role="alert">
+            <?php echo $_SESSION['success']; ?>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
 
     <div class="row mt-5">
 
