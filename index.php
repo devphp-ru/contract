@@ -4,7 +4,9 @@ error_reporting(-1);
 
 require __DIR__ . '/vendor/autoload.php';
 
-
+if (!empty($_POST)) {
+    print_r($_POST);
+}
 ?>
 <!doctype html>
 <html lang="en">
