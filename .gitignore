@@ -3,3 +3,4 @@
 /logs
 /assets
 /files
+.phpunit.result.cache
